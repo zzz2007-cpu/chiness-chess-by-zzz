@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>中国象棋 AI对弈</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Zhi+Mang+Xing&family=Ma+Shan+Zheng&family=Long+Cang&display=swap"
+        rel="stylesheet">
+    <style>
+        .menu {
+            width: min(100%, 540px);
+            margin: 80px auto;
+            padding: 32px;
+            border: 1px solid var(--stroke);
+            background: var(--panel);
+            border-radius: 16px;
+            text-align: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .menu-title {
+            font-family: 'Zhi Mang Xing', 'Long Cang', 'Ma Shan Zheng', KaiTi, 'STKaiti', serif;
+            font-size: 40px;
+            margin-bottom: 36px;
+            color: var(--text);
+            letter-spacing: 4px;
+        }
+
+        .menu button {
+            display: block;
+            width: 80%;
+            margin: 16px auto;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="menu">
+        <div class="menu-title">中国象棋</div>
+        <button class="btn" onclick="location.href='chinesschess.html'">人机对战</button>
+        <button class="btn" onclick="location.href='canju.html'">残局挑战</button>
+        <button class="btn" onclick="location.href='free_setup.html'">自由摆棋</button>
+        <button class="btn" onclick="location.href='hhchess.html'">人人对战</button>
+
+    </div>
+</body>
+
+</html>

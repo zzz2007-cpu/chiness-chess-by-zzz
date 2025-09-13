@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>自由摆棋（自定义局面）</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Zhi+Mang+Xing&family=Ma+Shan+Zheng&family=Long+Cang&display=swap"
+        rel="stylesheet">
+    <style>
+        .panel {
+            max-width: 720px;
+            margin: 18px auto;
+            padding: 12px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .panel .spacer {
+            flex: 1;
+        }
+
+        .palette button {
+            margin: 4px 6px;
+        }
+
+        .import-box {
+            width: 100%;
+            height: 80px;
+        }
+
+        .board-wrap {
+            margin-top: 8px;
+        }
+    </style>
+
+    <!-- 复用你现有脚本 -->
+    <script src="base.js"></script>
+    <script src="moveGenerator.js"></script>
+    <script src="evaluation.js"></script>
+    <script src="searchEngine.js"></script>
+    <script src="UI.js"></script>
+</head>
+
+<body>
+    <div class="app">
+        <div class="app-header">
+            <div class="app-title">自由摆棋 · 自定义局面</div>
+            <div class="app-badge hint"><a href="index.html" style="text-decoration:none;color:inherit">← 返回菜单</a></div>
+        </div>
+
+        <div class="panel">
+            <span>先手：</span>
+            <label><input type="radio" name="side" value="red" checked> 红</label>
+            <label><input type="radio" name="side" value="black"> 黑</label>
+
+            <span class="spacer"></span>
+
+            <button class="btn" id="btn-validate">校验</button>
+            <button class="btn" id="btn-clear">清空</button>
+            <button class="btn" id="btn-undo">悔棋</button> <!-- 新增 -->
+            <button class="btn" id="btn-start-ai">从此局面开局（对AI）</button>
+            <button class="btn" id="btn-start-hh">从此局面开局（人人对战）</button>
+
+        </div>
+
+        <div class="panel palette" id="palette" aria-label="棋子工具条"></div>
+
+        <div class="board-wrap">
+            <!-- 注意：下面这个 #editorBoard 是编辑态的棋盘；#playBoard 是真正开局后用 UI.js 渲染的棋盘 -->
+            <div class="board" id="editorBoard" aria-label="编辑棋盘"></div>
+            <div class="board" id="playBoard" aria-label="对弈棋盘" style="display:none"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // —— 状态 —— //
+        const EMPTY = NOCHESS;
+        let editorBoard = Array.from({ length: 10 }, _ => Array(9).fill(EMPTY));
+        let activeTool = '.'; // 当前工具（字符）
+        let editing = true;
+
+        // —— 字符 ↔ 你的枚举（红大写、黑小写）—— //
+        const charToCode = (ch) => {
+            switch (ch) {
+                case 'K': return R_KING;
+                case 'A': return R_BISHOP;
+                case 'B': return R_ELEPHANT;
+                case 'N': return R_HORSE;
+                case 'R': return R_CAR;
+                case 'C': return R_CANON;
+                case 'P': return R_PAWN;
+
+                case 'k': return B_KING;
+                case 'a': return B_BISHOP;
+                case 'b': return B_ELEPHANT;
+                case 'n': return B_HORSE;
+                case 'r': return B_CAR;
+                case 'c': return B_CANON;
+                case 'p': return B_PAWN;
+                case '.': default: return EMPTY;
+            }
+        };
+        const codeToChar = (code) => {
+            switch (code) {
+                case R_KING: return 'K';
+                case R_BISHOP: return 'A';
+                case R_ELEPHANT: return 'B';
+                case R_HORSE: return 'N';
+                case R_CAR: return 'R';
+                case R_CANON: return 'C';
+                case R_PAWN: return 'P';
+                case B_KING: return 'k';
+                case B_BISHOP: return 'a';
+                case B_ELEPHANT: return 'b';
+                case B_HORSE: return 'n';
+                case B_CAR: return 'r';
+                case B_CANON: return 'c';
+                case B_PAWN: return 'p';
+                default: return '.';
+            }
+        };
+
+        // —— 工具条 —— //
+        function buildPalette() {
+            const tools = [
+                { label: '红车', ch: 'R' }, { label: '红马', ch: 'N' }, { label: '红相', ch: 'B' },
+                { label: '红仕', ch: 'A' }, { label: '红帅', ch: 'K' }, { label: '红炮', ch: 'C' }, { label: '红兵', ch: 'P' },
+                { label: '黑车', ch: 'r' }, { label: '黑马', ch: 'n' }, { label: '黑象', ch: 'b' },
+                { label: '黑士', ch: 'a' }, { label: '黑将', ch: 'k' }, { label: '黑炮', ch: 'c' }, { label: '黑卒', ch: 'p' },
+                { label: '橡皮擦', ch: '.' }
+            ];
+            const pal = document.getElementById('palette');
+            pal.innerHTML = '';
+            tools.forEach(t => {
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.textContent = t.label;
+                btn.onclick = () => { activeTool = t.ch;[...pal.children].forEach(b => b.classList.remove('btn-primary')); btn.classList.add('btn-primary'); };
+                pal.appendChild(btn);
+            });
+        }
+
+        // —— 渲染编辑棋盘（类名与 UI.js 一致，以便套用现有样式）——
+        function renderEditor() {
+            const holder = document.getElementById('editorBoard');
+            let html = '';
+            for (let i = 0; i < 10; i++) {
+                html += '<tr>';
+                for (let j = 0; j < 9; j++) {
+                    const c = editorBoard[i][j];
+                    let cls = 'chess ';
+                    switch (c) {
+                        case B_KING: cls += 'black_shuai'; break;
+                        case R_KING: cls += 'red_shuai'; break;
+                        case B_BISHOP: cls += 'black_shi'; break;
+                        case R_BISHOP: cls += 'red_shi'; break;
+                        case B_ELEPHANT: cls += 'black_xiang'; break;
+                        case R_ELEPHANT: cls += 'red_xiang'; break;
+                        case B_HORSE: cls += 'black_ma'; break;
+                        case R_HORSE: cls += 'red_ma'; break;
+                        case B_CAR: cls += 'black_che'; break;
+                        case R_CAR: cls += 'red_che'; break;
+                        case B_CANON: cls += 'black_pao'; break;
+                        case R_CANON: cls += 'red_pao'; break;
+                        case B_PAWN: cls += 'black_bing'; break;
+                        case R_PAWN: cls += 'red_bing'; break;
+                        default: cls = '';
+                    }
+                    html += '<td class="' + cls + '" id="e_' + i + '_' + j + '" onclick="onCell(' + i + ',' + j + ')"></td>';
+                }
+                html += '</tr>';
+            }
+            holder.innerHTML = '<table cellspacing="0" cellpadding="0" border="0">' + html + '</table>';
+        }
+        window.onCell = function (i, j) {
+            if (!editing) return;
+            const code = charToCode(activeTool);
+            editorBoard[i][j] = code;
+            renderEditor();
+        };
+
+        // —— 基本校验：两王齐全 & 不照面 —— //
+        // free_setup.html 里替换 validateSetup()
+            function validateSetup() {
+                let rK = 0, bK = 0, rX = -1, rY = -1, bX = -1, bY = -1;
+                const inRect = (x, y, x1, y1, x2, y2) => x >= x1 && x <= x2 && y >= y1 && y <= y2;
+
+                for (let y = 0; y < 10; y++) for (let x = 0; x < 9; x++) {
+                    const c = editorBoard[y][x];
+
+                    if (c === R_KING) { rK++; rX = x; rY = y; }
+                    if (c === B_KING) { bK++; bX = x; bY = y; }
+
+                    // 士、帅的九宫限制
+                    if (c === R_KING && !inRect(x, y, 3, 7, 5, 9)) return { ok: false, msg: '红帅必须在下方九宫（行7-9列3-5）' };
+                    if (c === B_KING && !inRect(x, y, 3, 0, 5, 2)) return { ok: false, msg: '黑将必须在上方九宫（行0-2列3-5）' };
+                    if (c === R_BISHOP && !inRect(x, y, 3, 7, 5, 9)) return { ok: false, msg: '红士必须在下方九宫' };
+                    if (c === B_BISHOP && !inRect(x, y, 3, 0, 5, 2)) return { ok: false, msg: '黑士必须在上方九宫' };
+
+                    // 相/象不过河
+                    if (c === R_ELEPHANT && y < 5) return { ok: false, msg: '红相不能过河（必须在行5-9）' };
+                    if (c === B_ELEPHANT && y > 4) return { ok: false, msg: '黑象不能过河（必须在行0-4）' };
+                }
+
+                if (rK !== 1 || bK !== 1) return { ok: false, msg: '必须各有一枚帅/将' };
+
+                // 将帅照面
+                if (rX === bX) {
+                    let blocked = false;
+                    for (let y = Math.min(rY, bY) + 1; y < Math.max(rY, bY); y++) {
+                        if (editorBoard[y][rX] !== NOCHESS) { blocked = true; break; }
+                    }
+                    if (!blocked) return { ok: false, msg: '将帅照面，不合法' };
+                }
+                return { ok: true };
+            }
+
+
+        // —— 导出 / 导入（网格文本 + side）—— //
+        function boardToTextGrid(board) {
+            return board.map(row => row.map(codeToChar).join('')).join('\n');
+        }
+        function textGridToBoard(txt) {
+            const rows = txt.trim().split(/\n+/);
+            if (rows.length < 10) throw new Error('需要10行网格文本');
+            const b = Array.from({ length: 10 }, _ => Array(9).fill(EMPTY));
+            for (let y = 0; y < 10; y++) {
+                if (rows[y].length !== 9) throw new Error('第 ' + (y + 1) + ' 行不是9列');
+                for (let x = 0; x < 9; x++) b[y][x] = charToCode(rows[y][x]);
+            }
+            return b;
+        }
+
+        // —— 事件 —— //
+       document.getElementById('btn-validate').onclick = () => {
+    const r = validateSetup();
+    if (r.ok) {
+        showToast("通过：可作为起始局面", { type: "success" });
+    } else {
+        showToast("不通过：" + r.msg, { type: "error", duration: 2500 });
+    }
+};
+
+      document.getElementById('btn-clear').onclick = () => {
+            // 1) 原地清零
+            for (let y = 0; y < 10; y++)
+                for (let x = 0; x < 9; x++)
+                    editorBoard[y][x] = EMPTY;
+
+            // 2) 重建编辑棋盘
+            const holder = document.getElementById('editorBoard');
+            holder.innerHTML = "";
+            renderEditor();
+
+            // 3) 清掉小圆点
+            const gridTips = document.querySelectorAll('#editorBoard .tip');
+            gridTips.forEach(n => n.remove());
+
+            // 4) 状态彻底复位
+            editing = true;                 // 回到编辑模式
+            activeTool = '.';               // 默认工具：橡皮擦
+            document.getElementById('editorBoard').style.display = 'block';
+            document.getElementById('playBoard').style.display = 'none';
+            const turnInd = document.getElementById('turn-indicator');
+            if (turnInd) turnInd.style.display = 'none'; // 有的话隐藏
+        };
+
+
+        // —— 从此局面开局 —— //
+        const ui = new ChineseChessUI('playBoard'); // 用 UI.js 的完整对弈UI（已支持自定义开局）
+        function startFrom(mode) { // mode: 'ai' or 'hh'
+                const r = validateSetup();
+            if (!r.ok) {
+                showToast(r.msg, { type: "error", duration: 2500 });
+                return;
+            }
+
+                const side = document.querySelector('input[name="side"]:checked').value;
+                const sideToMove = (side === 'red') ? 1 : 0;
+
+                let machineSide;
+                if (mode === 'ai') {
+                    machineSide = 1 - sideToMove;   // 对AI
+                } else {
+                    machineSide = -1;               // 人人
+                }
+                const level = 3;
+
+                editing = false;
+                document.getElementById('editorBoard').style.display = 'none';
+                document.getElementById('playBoard').style.display = 'block';
+               const ti = document.getElementById('turn-indicator');
+            if (ti) ti.style.display = 'block';
+
+
+
+                // 注意：要传棋盘的拷贝，而不是 editorBoard 引用
+                const startBoard = editorBoard.map(row => row.slice());
+                ui.setCustomStart(startBoard, sideToMove, machineSide, level);
+            }
+
+        document.getElementById('btn-start-ai').onclick = () => startFrom('ai');
+        document.getElementById('btn-start-hh').onclick = () => startFrom('hh');
+        document.getElementById("btn-undo").onclick = () => toastNoUndo();
+
+
+        // 初始化
+        buildPalette();
+        renderEditor();
+    </script>
+</body>
+
+</html>

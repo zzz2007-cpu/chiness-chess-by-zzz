@@ -1,0 +1,468 @@
+:root {
+  --bg1: #0f172a;
+  --bg2: hsl(221, 39%, 11%);
+  --panel: rgba(255, 255, 255, 0.08);
+  --stroke: rgba(255, 255, 255, 0.12);
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --accent: #f43f5e;
+  --accent-2: #22c55e;
+  --btn-bg: #1f2937;
+  --btn-bg-hover: #374151;
+  --card: #0b1220;
+}
+
+* {
+  box-sizing: border-box
+}
+
+html,
+body {
+  height: 100%
+}
+
+body {
+  margin: 0;
+  font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'PingFang SC', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(1200px 600px at 15% -10%, #1d2b53 0%, transparent 60%),
+    radial-gradient(800px 400px at 90% 10%, #083344 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg1), var(--bg2));
+}
+
+/* 布局与棋盘 */
+.app {
+  width: min(100%, 720px);
+  margin: 24px auto 48px;
+  padding: 16px;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px auto 16px;
+  width: min(100%, 540px);
+  padding: 12px 16px;
+  border: 1px solid var(--stroke);
+  background: var(--panel);
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+}
+
+.app-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.app-badge {
+  font-size: 12px;
+  color: var(--muted)
+}
+
+.board-wrap {
+  position: relative;
+  width: min(100%, 540px);
+  margin: 0 auto;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--stroke);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
+
+.board {
+  width: 459px;
+  height: 510px;
+  margin: 0 auto;
+  background-image: url('images/chinesechess_board.gif');
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.board table {
+  width: 100%;
+  border-collapse: collapse
+}
+
+.board table td {
+  width: 51px;
+  height: 51px;
+  position: relative;
+  user-select: none;
+  cursor: pointer;
+  transition: transform .08s ease;
+}
+
+.board table td:active {
+  transform: scale(.97)
+}
+
+.chess {
+  background: url('images/chinesechess_corner.gif') no-repeat
+}
+
+.red_shuai {
+  background-position: 0 0
+}
+
+.red_shi {
+  background-position: -50px 0
+}
+
+.red_xiang {
+  background-position: -100px 0
+}
+
+.red_ma {
+  background-position: -150px 0
+}
+
+.red_che {
+  background-position: -200px 0
+}
+
+.red_pao {
+  background-position: -250px 0
+}
+
+.red_bing {
+  background-position: -300px 0
+}
+
+.black_shuai {
+  background-position: 0 -50px
+}
+
+.black_shi {
+  background-position: -50px -50px
+}
+
+.black_xiang {
+  background-position: -100px -50px
+}
+
+.black_ma {
+  background-position: -150px -50px
+}
+
+.black_che {
+  background-position: -200px -50px
+}
+
+.black_pao {
+  background-position: -250px -50px
+}
+
+.black_bing {
+  background-position: -300px -50px
+}
+
+.selected {
+  background-position: 0 -100px;
+  width: 51px;
+  height: 51px;
+  filter: drop-shadow(0 0 6px rgba(244, 63, 94, .9));
+  animation: ping 1.2s ease-in-out infinite;
+}
+
+@keyframes ping {
+  0% {
+    transform: scale(1)
+  }
+
+  50% {
+    transform: scale(1.06)
+  }
+
+  100% {
+    transform: scale(1)
+  }
+}
+
+.op {
+  width: min(100%, 540px);
+  margin: 14px auto 0;
+  padding: 12px 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: center;
+  border: 1px solid var(--stroke);
+  background: var(--panel);
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+}
+
+.op,
+.op label,
+.op select,
+.op button,
+.app-header {
+  font-size: 14px
+}
+
+select {
+  appearance: none;
+  padding: 8px 36px 8px 12px;
+  color: var(--text);
+  background: var(--card) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%23e5e7eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 10px center/14px;
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  outline: none;
+}
+
+select:focus {
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, .25);
+  border-color: var(--accent)
+}
+
+input[type="radio"] {
+  accent-color: var(--accent)
+}
+
+label {
+  margin-right: 6px
+}
+
+.btn {
+  appearance: none;
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--btn-bg), var(--card));
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: .3px;
+  border: 1px solid var(--stroke);
+  transition: transform .08s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.btn:hover {
+  background: linear-gradient(180deg, var(--btn-bg-hover), var(--card));
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .35)
+}
+
+.btn:active {
+  transform: translateY(1px)
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, #e11d48, #b91c1c);
+  border-color: rgba(255, 255, 255, .18);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 10px 25px rgba(225, 29, 72, .45)
+}
+
+.btn-primary:focus {
+  box-shadow: 0 0 0 3px rgba(244, 63, 94, .35)
+}
+
+.hint {
+  color: var(--muted)
+}
+
+@media (max-width:520px) {
+  .board {
+    transform: scale(.9);
+    transform-origin: top center
+  }
+}
+
+@media (max-width:480px) {
+  .board {
+    transform: scale(.8)
+  }
+}
+
+/* --- 将军/绝杀 · 霓虹能量环 + 光带扫过（修正：无重复/无嵌套/无裸属性） --- */
+.check-banner {
+  /* 可调参数（mate 会覆盖） */
+  --glow: #e11d48;
+  /* 发光主色：会被 .red/.black 改 */
+  --stroke: rgba(0, 0, 0, .7);
+  --in: 900ms;
+  --shine: 1200ms;
+  --delay: 900ms;
+  --out: 900ms;
+
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px) scale(.86);
+  font-family: 'Zhi Mang Xing', 'Ma Shan Zheng', 'Long Cang',
+    'HanziPen SC', 'STXingkai', 'STKaiti', 'KaiTi', 'Kaiti SC', 'DFKai-SB',
+    'Noto Serif SC', 'Songti SC', sans-serif;
+  font-synthesis: none;
+  font-size: clamp(42px, 7.2vw, 68px);
+  font-weight: 1000;
+  letter-spacing: .28em;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+
+  /* 霓虹描边 + 文字光泽渐变（会被动画“shine”扫动） */
+  color: transparent;
+  -webkit-text-stroke: 2px var(--stroke);
+  background-image:
+    linear-gradient(90deg,
+      #ffffff 0%,
+      rgba(255, 255, 255, .95) 25%,
+      var(--glow) 55%,
+      rgba(255, 255, 255, .98) 75%,
+      #ffffff 100%);
+  background-size: 240% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  text-shadow:
+    0 4px 24px rgba(0, 0, 0, .35),
+    0 0 22px color-mix(in srgb, var(--glow) 55%, transparent);
+
+  /* 入场 → 光带扫过 → 渐隐退场 */
+  animation:
+    banner-in var(--in) cubic-bezier(.2, .95, .2, 1) forwards,
+    shine var(--shine) .15s linear 1,
+    banner-out var(--out) var(--delay) ease forwards;
+}
+
+/* 红方受攻/被绝杀 → 红色气场 */
+.check-banner.red {
+  --glow: #ff2748;
+  filter: drop-shadow(0 0 14px rgba(255, 39, 72, .55));
+}
+
+/* 黑方受攻/被绝杀 → 暗金/黑色气场 */
+.check-banner.black {
+  --glow: #111827;
+  --stroke: rgba(0, 0, 0, .88);
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, .75));
+}
+
+/* “绝杀”更慢、更久、更渐进 */
+.check-banner.mate {
+  letter-spacing: .34em;
+  --in: 1200ms;
+  --shine: 1800ms;
+  --delay: 1400ms;
+  --out: 1800ms;
+}
+
+/* 能量环与光晕 */
+.check-banner::before,
+.check-banner::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(.6);
+  width: clamp(160px, 36vw, 360px);
+  height: clamp(160px, 36vw, 360px);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.check-banner::before {
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--glow) 65%, transparent) 0%, transparent 60%);
+  animation: ring var(--in) cubic-bezier(.2, .95, .2, 1) forwards;
+}
+
+.check-banner::after {
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--glow) 80%, transparent),
+    0 0 42px 10px color-mix(in srgb, var(--glow) 45%, transparent) inset;
+  animation: halo var(--out) var(--delay) ease-out forwards;
+}
+
+/* —— 关键帧 —— */
+@keyframes banner-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-12px) scale(.78);
+    filter: blur(6px) saturate(1.4);
+  }
+
+  55% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1.10);
+    filter: blur(0) saturate(1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.00);
+  }
+}
+
+@keyframes banner-out {
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-2px) scale(1.06);
+    filter: blur(2px);
+  }
+}
+
+@keyframes shine {
+  from {
+    background-position: -40% 0;
+  }
+
+  to {
+    background-position: 120% 0;
+  }
+}
+
+@keyframes ring {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(.25);
+    filter: blur(10px);
+  }
+
+  60% {
+    opacity: .75;
+    transform: translate(-50%, -50%) scale(1.05);
+    filter: blur(6px);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.2);
+    filter: blur(14px);
+  }
+}
+
+@keyframes halo {
+  0% {
+    opacity: .0;
+    transform: translate(-50%, -50%) scale(.95);
+    filter: blur(18px);
+  }
+
+  40% {
+    opacity: .35;
+    transform: translate(-50%, -50%) scale(1.05);
+    filter: blur(20px);
+  }
+
+  100% {
+    opacity: .0;
+    transform: translate(-50%, -50%) scale(1.18);
+    filter: blur(22px);
+  }
+}
+.menu button:hover,
+.levels button:hover {
+  background: linear-gradient(180deg, #e11d48, #b91c1c);
+  border-color: rgba(255, 255, 255, .18);
+  box-shadow: 0 10px 25px rgba(225, 29, 72, .45);
+  color: #fff;
+}

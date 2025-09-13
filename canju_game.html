@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>残局闯关</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zhi+Mang+Xing&family=Ma+Shan+Zheng&family=Long+Cang&display=swap" rel="stylesheet">
+
+  <!-- 复用你的脚本顺序 -->
+  <script src="base.js"></script>
+  <script src="moveGenerator.js"></script>
+  <script src="evaluation.js"></script>
+  <script src="searchEngine.js"></script>
+  <script src="UI.js"></script>
+  <style>
+    .toolbar { max-width: 520px; margin: 10px auto 0; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .toolbar .spacer { flex:1 }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="app-header">
+      <div id="title" class="app-title">残局闯关</div>
+      <div class="app-badge hint"><a href="canju.html" style="text-decoration:none;color:inherit">← 返回选择</a></div>
+    </div>
+
+    <div class="board-wrap">
+      <div class="board" id="board" aria-label="棋盘"></div>
+    </div>
+
+    <div class="toolbar" role="group" aria-label="残局工具">
+      <span id="desc" class="hint"></span>
+      <span class="spacer"></span>
+      <button class="btn" id="btn-undo">悔棋</button> <!-- 新增 -->
+      <button class="btn" id="btn-restart">重开本局</button>
+      <button class="btn" id="btn-next">下一局</button>
+    </div>
+  </div>
+
+  <script>
+    // 读取 URL 参数
+    function getParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+    const PUZZLE_ID = getParam("id"); // 例如 chuhe-juesha
+
+    const ui = new ChineseChessUI("board");
+    let allPuzzles = [];
+    let curIndex = 0;
+
+    // 加载 JSON
+    fetch("puzzles.json")
+      .then(r => r.json())
+      .then(list => {
+        allPuzzles = list;
+        // 定位到对应 id（找不到就默认第 0 个）
+        const i = allPuzzles.findIndex(p => p.id === PUZZLE_ID);
+        curIndex = i >= 0 ? i : 0;
+        loadPuzzle(curIndex);
+      })
+      .catch(err => {
+        console.error(err);
+        alert("加载残局失败，请检查 puzzles.json");
+      });
+
+    function loadPuzzle(i) {
+      curIndex = (i + allPuzzles.length) % allPuzzles.length;
+      const p = allPuzzles[curIndex];
+
+      // 标题、描述
+      document.getElementById("title").textContent = "残局 · " + (p.title || p.id);
+      document.getElementById("desc").textContent  = p.desc || "";
+
+      // 使用 UI.js 的自定义开局入口（你已添加过）
+      ui.setCustomStart(p.board, p.sideToMove, p.machineSide, p.level ?? 4);
+      history.replaceState({}, "", "canju_game.html?id=" + encodeURIComponent(p.id));
+    }
+
+    // 事件：重开 / 下一局
+    document.getElementById("btn-restart").onclick = () => loadPuzzle(curIndex);
+    document.getElementById("btn-next").onclick    = () => loadPuzzle(curIndex + 1);
+    document.getElementById("btn-undo").onclick = () => toastNoUndo();
+
+
+  </script>
+</body>
+</html>

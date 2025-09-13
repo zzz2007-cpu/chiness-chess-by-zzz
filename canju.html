@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>残局闯关 · 关卡选择</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        .menu {
+            width: min(100%, 720px);
+            margin: 60px auto;
+            padding: 32px;
+            border: 1px solid var(--stroke);
+            background: var(--panel);
+            border-radius: 18px;
+            text-align: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .menu-title {
+            font-family: 'Zhi Mang Xing', 'Long Cang', 'Ma Shan Zheng', KaiTi, 'STKaiti', serif;
+            font-size: 42px;
+            margin-bottom: 40px;
+            color: var(--text);
+            letter-spacing: 4px;
+        }
+
+        .levels {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 18px;
+        }
+
+        .levels button {
+            font-size: 16px;
+            padding: 12px 0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform .1s ease, box-shadow .2s ease;
+        }
+
+       .levels button:hover {
+  background: linear-gradient(180deg, #e11d48, #b91c1c);
+  border-color: rgba(255, 255, 255, .18);
+  box-shadow: 0 10px 25px rgba(225, 29, 72, .45);
+  color: #fff;
+}
+
+    </style>
+</head>
+
+<body>
+    <div class="menu">
+    <div class="menu-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="menu-title">关卡选择</div>
+        <div class="app-badge hint">
+            <a href="index.html" style="text-decoration:none;color:inherit">← 返回菜单</a>
+        </div>
+    </div>
+
+        <div class="levels">
+            <button class="btn" onclick="location.href='canju_game.html?id=menggong-sha'">闷宫</button>
+            <button class="btn" onclick="location.href='canju_game.html?id=tie-menshuan'">铁门闩</button>
+            <button class="btn" onclick="location.href='canju_game.html?id=ma-hou-pao-2'">马后炮</button>
+            <button class="btn" onclick="location.href='canju_game.html?id=li-ma-che-2'">立马车</button>
+            <button class="btn" onclick="location.href='canju_game.html?id=ma-hou-pao-4'">马后炮杀法</button>
+        <button class="btn" onclick="location.href='canju_game.html?id=erjiang-juanqu'">二将捐躯</button>
+            <button class="btn" onclick="location.href='canju_game.html?id=beishui-liezhen'">背水列阵</button>
+            <button class="btn" onclick="location.href='canju_game.html?id=pifu-chengyong'">匹夫逞勇</button>
+            <button class="btn" onclick="location.href='canju_game.html?id=chuma-jiangong'">出马建功</button>
+            <button class="btn" onclick="location.href='canju_game.html?id=huima-shenqiang'">回马神枪</button>
+            <button class="btn" onclick="location.href='canju_game.html?id=shema-qinwang'">射马擒王</button>
+            <button class="btn" onclick="location.href='canju_game.html?id=qiongkou-mozhui'">穷寇莫追</button>
+            <button class="btn" onclick="location.href='canju_game.html?id=tangbi-dangche'">螳臂当车</button>
+            <button class="btn" onclick="location.href='canju_game.html?id=jiaodao-shuangma'">绞刀双马</button>
+            <button class="btn" onclick="location.href='canju_game.html?id=shuangyan-chuanhu'">双燕穿户</button>
+            <button class="btn" onclick="location.href='canju_game.html?id=liangma-jiangong'">良马建功</button>
+        </div>
+    </div>
+</body>
+
+</html>

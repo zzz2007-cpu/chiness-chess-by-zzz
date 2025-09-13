@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>中国象棋 · AI</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zhi+Mang+Xing&family=Ma+Shan+Zheng&family=Long+Cang&display=swap"
+    rel="stylesheet">
+
+  <script src="base.js"></script>
+  <script src="moveGenerator.js"></script>
+  <script src="evaluation.js"></script>
+  <script src="searchEngine.js"></script>
+  <script src="UI.js"></script>
+</head>
+<body>
+  <div class="app">
+    <div class="app-header">
+      <div class="app-header">
+        <div class="app-title">中国象棋 · AI 对弈</div>
+        <div class="app-badge hint">
+          <a href="index.html" style="text-decoration:none;color:inherit">← 返回菜单</a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="board-wrap">
+      <div class="board" id="board" aria-label="棋盘"></div>
+    </div>
+
+    <div class="op" role="group" aria-label="对局设置">
+      <span>级别：</span>
+      <select id="level" aria-label="AI级别">
+        <option value="1">一级</option>
+        <option value="2">二级</option>
+        <option value="3">三级</option>
+        <option value="4">四级</option>
+      </select>
+
+      <span class="hint">开局：</span>
+      <input type="radio" name="start" value="1" id="start_1" checked>
+      <label for="start_1">人</label>
+      <input type="radio" name="start" value="0" id="start_2">
+      <label for="start_2">机器</label>
+      <button id="btn-undo" class="btn">悔棋</button> <!-- 新增 -->
+      <button id="btn" class="btn btn-primary">开始对弈</button>
+      <span class="hint">提示：点击自己的棋子 → 再点目标格</span>
+
+    </div>
+  </div>
+
+  <script>
+    const cc = new ChineseChessUI('board');
+    function start() {
+      const levelEls = document.getElementById('level');
+      const startEls = document.getElementsByName('start');
+      let start = 1;
+      for (let i = 0; i < startEls.length; i++) {
+        if (startEls[i].checked) { start = parseInt(startEls[i].value, 10); break; }
+      }
+      const level = parseInt(levelEls.value, 10);
+      cc.start(level, start);
+    }
+    document.getElementById('btn').addEventListener('click', start);
+   document.getElementById("btn-undo").onclick = () => toastNoUndo();
+
+
+  </script>
+
+</body>
+</html>
